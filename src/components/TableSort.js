@@ -37,9 +37,11 @@ const TableSort = ({data, getData}) => {
     const [filterValue, setFilterValue] = useState()
     const [currentFilterState, setCurrentFilterState] = useState()
 
+
     useEffect(() => {
         getData()
     }, [])
+
 
     useEffect(() => {
         if (data.data !== undefined) {
@@ -56,14 +58,18 @@ const TableSort = ({data, getData}) => {
         }
     }, [dataState])
 
+
     const handleColumnSort = (param) => {
         setColumnToSort(param)
         if (columnToSort === param) {
             setColumnToSort(param + 'Down')
             const newState = dataState.reverse()
             setDataState([...newState])
-            setDisplaySegment(dataState.splice(dataState.length - 20, dataState.length))
-
+            setDisplaySegment(dataState.slice(dataState.length - 20, dataState.length))
+            if (maxSegmentLists === 0) {
+                setSegmentIndex(maxSegmentLists)
+                return;
+            }
             setSegmentIndex(maxSegmentLists - 1)
             return
         }
@@ -77,7 +83,7 @@ const TableSort = ({data, getData}) => {
             return 0;
         })
         setDataState([...newState])
-        setDisplaySegment(dataState.splice(0, 20))
+        setDisplaySegment(dataState.slice(0, 20))
         setSegmentIndex(0)
     }
 
@@ -95,22 +101,18 @@ const TableSort = ({data, getData}) => {
         })
         setDataState(newState)
         setSegmentIndex(0)
-
-
     }
 
     const handleStateFilter = (e) => {
         e.preventDefault()
         let newState = dataState.filter((item) => {
-            if (item.adress.dataState == currentFilterState) {
+            if (item.adress.state == currentFilterState) {
                 return true
             }
             return false
         })
         setDataState(newState)
         setSegmentIndex(0)
-
-
     }
 
     const handleSelectPage = (value) => {
@@ -143,8 +145,8 @@ const TableSort = ({data, getData}) => {
                     value={inputValue}
                     onChange={e => setInputValue(e.target.value)}
                 />
-                <select value={filterValue} onChange={e => setFilterValue(e.target.value)}>
-                    <option selected disabled>Chose option</option>
+                <select defaultValue={'DEFAULT'} value={filterValue} onChange={e => setFilterValue(e.target.value)}>
+                    <option value="DEFAULT" disabled>Choose option</option>
                     <option value="id">№</option>
                     <option value="firstName">First Name</option>
                     <option value="lastName">Last Name</option>
@@ -154,8 +156,9 @@ const TableSort = ({data, getData}) => {
                 <button onClick={handleFilter}>Confirm</button>
             </form>
             <form>
-                <select value={currentFilterState} onChange={e => setCurrentFilterState(e.target.value)}>
-                    <option selected disabled>Chose state</option>
+                <select defaultValue={'DEFAULT'} value={currentFilterState}
+                        onChange={e => setCurrentFilterState(e.target.value)}>
+                    <option value='DEFAULT' disabled>Choose state</option>
                     <option value="WI">WI</option>
                     <option value="TI">TI</option>
                     <option value="FL">FL</option>
@@ -168,15 +171,19 @@ const TableSort = ({data, getData}) => {
                 <button onClick={handleDeleteFilter}>Clear filter</button>
             </form>
             <table className="Table">
+                <thead>
                 <tr className="TableUpperRow">
-                    {tableLayout.map((item) => {
-                        return <th className="TableCeil" onClick={() => handleColumnSort(item[1])}><p>{item[0]}</p>
+                    {tableLayout.map((item, index) => {
+                        return <th key={index} className="TableCeil" onClick={() => handleColumnSort(item[1])}>
+                            <p>{item[0]}</p>
                             <span>{columnToSort === item[1] ? '🔼' : columnToSort === item[1] + 'Down' ? '🔽' : null}</span>
                         </th>
                     })}
                 </tr>
-                {displaySegment && displaySegment.map((item) => {
-                    return <tr className="TableCeil" onClick={() => setDetailDescription(item)}>
+                </thead>
+                <tbody>
+                {displaySegment && displaySegment.map((item, index) => {
+                    return <tr key={index} className="TableCeil" onClick={() => setDetailDescription(item)}>
                         <th>{item.id}</th>
                         <th>{item.firstName}</th>
                         <th>{item.lastName}</th>
@@ -185,6 +192,7 @@ const TableSort = ({data, getData}) => {
                         <th>{item.adress.state}</th>
                     </tr>
                 })}
+                </tbody>
             </table>
             <ul className="PageScroller">
                 {segmentIndex !== 0 ?
@@ -192,7 +200,7 @@ const TableSort = ({data, getData}) => {
                         <button className="PageButtons" onClick={() => handleSelectPage('prev')}>prev</button>
                     </li> : null}
                 <li>{segmentIndex + 1}</li>
-                {segmentIndex + 1 !== maxSegmentLists ?
+                {segmentIndex + 1 !== maxSegmentLists && maxSegmentLists !== 0 ?
                     <li>
                         <button className="PageButtons" onClick={() => handleSelectPage('next')}>next</button>
                     </li> : null}

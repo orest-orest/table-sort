@@ -2,8 +2,6 @@ import React from 'react';
 
 export const DetailDescription = ({description}) => {
 
-    console.log(description)
-
     return (
         <div>
             <h3>Profile Info</h3>
@@ -12,8 +10,6 @@ export const DetailDescription = ({description}) => {
             <p>City: {description.adress.city}</p>
             <p>State: {description.adress.state}</p>
             <p>Index: {description.adress.zip}</p>
-
-
         </div>
     )
 }
